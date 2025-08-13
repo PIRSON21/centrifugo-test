@@ -4,7 +4,7 @@ import './App.css';
 
 // Вставь свой URL Centrifugo и токен ниже
 const CENTRIFUGO_URL = 'ws://localhost:8000/connection/websocket'; // пример
-const CENTRIFUGO_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTQ4OTk3MTEsInB1Ymxpc2giOnRydWUsInN1YiI6InRlc3QifQ.vQrF2BHj6r0sO8ACWxMc9gDgaBcde6p0wm8vwZ5r9cY'; // пример
+const CENTRIFUGO_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTUwMjM3NTEsInB1Ymxpc2giOnRydWUsInN1YiI6IjkwYTQ5OTY1LWFlOWYtNDVmNS1hNjY1LWY4MzU3NTE3MjI5NyJ9.ZIkwKZH0h6CulM3NKAhv4oCmwVgnOt6ieYX_ZrapcJo'
 
 function App() {
     const [channel, setChannel] = useState('');
@@ -48,8 +48,16 @@ function App() {
 
     const publish = async () => {
         if (!centrifugeRef.current) return;
+        let payload;
         try {
-            await centrifugeRef.current.publish(channel, { text: message });
+            // Пробуем распарсить message как JSON
+            payload = JSON.parse(message);
+        } catch {
+            // Если не получилось — отправляем как строку
+            payload = { text: message };
+        }
+        try {
+            await centrifugeRef.current.publish(channel, payload);
             setMessage('');
         } catch (e) {
             alert('Ошибка публикации: ' + e.message);
@@ -79,7 +87,7 @@ function App() {
                 <div style={{ background: '#f9f9f9', minHeight: 100, padding: 10, border: '1px solid #ddd' }}>
                     {messages.length === 0 ? <em>No messages yet</em> :
                         messages.map((msg, i) => (
-                            <div key={i} style={{ marginBottom: 8 }}>
+                            <div key={i} style={{ marginBottom: 8, color: '#333', background: '#fff', padding: 5, borderRadius: 4 }}>
                                 {typeof msg === 'object' ? JSON.stringify(msg) : String(msg)}
                             </div>
                         ))}
